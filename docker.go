@@ -25,6 +25,9 @@ import (
 	"sync"
 	"errors"
 	"fmt"
+	"os/exec"
+	"bytes"
+	"io"
 )
 
 type DockerEvents chan string
@@ -198,7 +201,7 @@ func (r *Docker) NotifyOnDeath(channel DockerEvents) {
 	r.destruction_events = channel
 }
 
-func (r *Docker) Attach(id, command, args string) error {
+func (r *Docker) Attach(id, command string, input io.Reader) error {
 	glog.V(4).Infof("Attempting to attach to the container: %s, command: %s", id, command)
 	/* step: check the container exists */
 	if found, err := r.Exists(id); err != nil {
@@ -206,10 +209,32 @@ func (r *Docker) Attach(id, command, args string) error {
 	} else if found == false {
 		return errors.New(fmt.Sprintf("The container: %s does not exists", id))
 	} else {
-	 	//if r.client.CreateExec()
+		exec_options := &docker.CreateExecOptions{
+			Container:    id,
+			Cmd:          strings.Split(command, " "),
+			AttachStdin:  true,
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          false,
+		}
+		if input != nil {
+			exec_options.AttachStdin = true
+			exec_options.Tty = true
+		}
+		if create_exec, err := r.client.CreateExec(*exec_options); err != nil {
+			glog.Errorf("Failed to create exec options: %s, error: %s", exec_options, err)
+			return err
+		} else {
+			glog.V(5).Info("Created exec id: %s for container: %s", create_exec.ID, id[:12])
+			/* step: we create the StartExecOptions */
+			exec := StartExecOptions{
+				OutputStream: new(bytes.Buffer),
+				ErrorStream:  new(bytes.Buffer),
+				InputStream:  input,
+				RawTerminal:  false,
+			}
 
-
-
+		}
 		return nil
 	}
 }

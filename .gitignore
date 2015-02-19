@@ -22,3 +22,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+examples/exec/exec
+examples/exec-shell/exec-shell
+.idea
+fabric.iml
