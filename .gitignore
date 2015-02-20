@@ -28,3 +28,4 @@ examples/exec-shell/exec-shell
 .idea
 fabric.iml
 examples/sshd/sshd
+stage/fabric

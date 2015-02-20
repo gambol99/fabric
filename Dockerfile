@@ -4,4 +4,12 @@
 #
 #  vim:ts=2:sw=2:et
 #
+FROM progrium/busybox
+MAINTAINER Rohith <gambol99@gmail.com>
 
+ADD stage/fabric /bin
+RUN opkg-install bash
+RUN chmod +x /bin/fabric
+
+EXPOSE 1022 7369
+ENTRYPOINT [ "/bin/fabric" ]

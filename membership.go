@@ -16,10 +16,3 @@ limitations under the License.
 
 package main
 
-import (
-
-	members "github.com/hashicorp/memberlist"
-)
-
-
-

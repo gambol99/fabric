@@ -18,16 +18,15 @@ package main
 
 import (
 	"flag"
-
-	docker "github.com/gambol99/go-dockerclient"
-	"github.com/golang/glog"
 	"strings"
 	"sync"
 	"errors"
 	"fmt"
-	"os/exec"
 	"bytes"
 	"io"
+
+	docker "github.com/fsouza/go-dockerclient"
+	"github.com/golang/glog"
 )
 
 type DockerEvents chan string
@@ -59,7 +58,7 @@ type ContainerStore interface {
 	/* check if a container exists */
 	Exists(id string) (bool, error)
 	/* attach to the container */
-	Attach(id string)
+	Attach(containerId string, command string, input io.Reader) error
 	/* listen for container creations */
 	NotifyOnCreation(channel DockerEvents)
 	/* listen out for deaths of containers */
@@ -227,13 +226,14 @@ func (r *Docker) Attach(id, command string, input io.Reader) error {
 		} else {
 			glog.V(5).Info("Created exec id: %s for container: %s", create_exec.ID, id[:12])
 			/* step: we create the StartExecOptions */
-			exec := StartExecOptions{
+			exec := docker.StartExecOptions{
 				OutputStream: new(bytes.Buffer),
 				ErrorStream:  new(bytes.Buffer),
 				InputStream:  input,
 				RawTerminal:  false,
 			}
 
+			var _ = exec
 		}
 		return nil
 	}

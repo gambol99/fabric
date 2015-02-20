@@ -17,10 +17,8 @@ limitations under the License.
 package main
 
 import (
-
 	"github.com/golang/glog"
 )
-
 
 func main() {
 	/* step: parse the command line options and load configuration */
@@ -30,11 +28,8 @@ func main() {
 
 	/* step: bind our terminal service and wait for incoming requests */
 
-
 	/* step: attempt to communicate to other members in the cluster */
 
-
 	/* step: wait for a shutdown signal */
-
 
 }

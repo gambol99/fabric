@@ -14,16 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
 	docker "github.com/fsouza/go-dockerclient"
 	"os"
-	"bufio"
 )
 
 func main() {
@@ -38,7 +37,7 @@ func main() {
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
-		Tty:          true,}
+		Tty:          true}
 
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
@@ -76,7 +75,7 @@ func main() {
 	}()
 
 	err = <-errChan
-	fmt.Printf("finished the exe : %s\n", startOpts.OutputStream )
+	fmt.Printf("finished the exe : %s\n", startOpts.OutputStream)
 	if err != nil {
 		fmt.Println("failed to run in container - Exec start failed - %v", err)
 		os.Exit(1)
