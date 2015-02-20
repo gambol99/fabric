@@ -33,6 +33,10 @@ func FileExists(filename string) (bool, error) {
 	return true, nil
 }
 
+func IsValidHost(host string) bool {
+	return true
+}
+
 func Assert(err error) {
 	if err != nil {
 		glog.Fatalf("Failed, error: %s", err)
