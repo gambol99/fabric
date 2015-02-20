@@ -28,4 +28,6 @@ examples/exec-shell/exec-shell
 .idea
 fabric.iml
 examples/sshd/sshd
+examples/sshd/id_rsa
+examples/sshd/id_rsa.pub
 stage/fabric
