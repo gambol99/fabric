@@ -67,32 +67,35 @@ type ContainerStore interface {
 
 type Docker struct {
 	sync.RWMutex
-	/* the docker client */
+	// the docker client */
 	client *docker.Client
-	/* a lock for the docker events */
+
+	// a lock for the docker events
 	once_lock sync.Once
-	/* the shutdown signal */
+
+	// the shutdown signal
 	shutdown ShutdownChannel
-	/* the channel to send creation events */
+
+	// the channel to send creation events
 	creation_events DockerEvents
-	/* the channel to send destruction events */
+
+	// the channel to send destruction events
 	destruction_events DockerEvents
 }
 
 type DockerContainer struct {
-	/* the get of the container */
+	// the get of the container
 	id string
-	/* the name of the container */
+	// the name of the container
 	name string
-	/* the image of the container */
+	// the image of the container
 	image string
-	/* the ports which are being exposed */
 }
 
 func NewContainerStore() (ContainerStore, error) {
 	glog.Infof("Creating a docker store service, socket: %s", docker_socket)
 	store := new(Docker)
-	/* step: lets create the docker client */
+	// step: lets create the docker client
 	if client, err := docker.NewClient("unix://" + docker_socket); err != nil {
 		glog.Errorf("Failed to create a docker client, socket: %s, error: %s", docker_socket, err)
 		return nil, err
@@ -103,7 +106,7 @@ func NewContainerStore() (ContainerStore, error) {
 			glog.Errorf("Failed to ping via the docker client, errorr: %s", err)
 			return nil, err
 		}
-		/* step: lets create the docker events */
+		// step: lets create the docker events
 		if err := store.EventProcessor(); err != nil {
 			glog.Errorf("Failed to start the events processor, error: %s", err)
 			return nil, err
@@ -151,14 +154,14 @@ func (r *Docker) EventProcessor() error {
 		glog.Errorf("Failed to add ourselve as a docker events listener, error: %s", err)
 		return err
 	}
-	/* step: start the events processor */
+	// step: start the events processor
 	go func() {
 		glog.Infof("Starting the events processor for docker events")
 		for {
 			select {
 			case event := <-update_channel:
 				glog.V(4).Infof("Receivied a docker event, id: %s, status: %s", event.ID[:12], event.Status)
-				/* step: are we creating or dying */
+				// step: are we creating or dying
 				switch event.Status {
 				case DOCKER_START:
 					if r.creation_events != nil {

@@ -20,44 +20,57 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/golang/glog"
 	swim "github.com/hashicorp/memberlist"
+	"github.com/golang/glog"
 )
 
-/* the api interface for fabric */
+// the api interface for fabric
 type Fabric interface {
-	/* shutdown the service */
+	// shutdown the service
 	Shutdown()
 }
 
 type FabricService struct {
+	// The notification interface from memberlist, called on membership changes;
+	// joins, leaves and updates
 	swim.EventDelegate
+
 	// The cluster configuration for the SWIM protocol
 	cluster_config *swim.Config
+
 	// The SWIM client for membership knowledge; note, SWIM is only used to provide a
 	// reliable means of cluster membership and notification of membership changes.
 	// Messages and state exchanged between members is performed by google protocol
 	// buffers
 	cluster *swim.Memberlist
-	/* the authenticator service */
+
+	// The authentication service used by the SSH service as a means of validating
+	// the users and authenticating their privileges
 	auth Authenticator
-	/* the docker store client */
+
+	// The container store is a interface into docker, pulling, notifying etc
 	containers ContainerStore
-	/* the shutdown channel */
+
+	// The shutdown signal for the fabric service
 	shutdown ShutdownChannel
-	/* the members state */
+
+	// the members state and the
 }
 
 func NewFabricService() (Fabric, error) {
 	var err error
+
+	// step: create the fabric service
 	fabric := new(FabricService)
 	fabric.shutdown = make(ShutdownChannel)
-	/* step: create the authenticator service */
+
+	// step: create the authenticator service
 	fabric.auth, err = NewAuthenticator()
 	Assert(err)
 	fabric.containers, err = NewContainerStore()
 	Assert(err)
-	/* step: we need to setup the cluster membership */
+
+	// step: we need to setup the cluster membership
 	if err := fabric.SetupClusterMembership(); err != nil {
 		glog.Errorf("Failed to setup the cluster, error: %s", err)
 		return nil, err
@@ -68,31 +81,37 @@ func NewFabricService() (Fabric, error) {
 func (r *FabricService) SetupClusterMembership() error {
 	var err error
 	glog.Infof("Initializing the cluster membership, boostrap: %t", Options.Bootstrap)
-	/* step; we need to generate the configuration */
+
+	// step; we need to generate the configuration
 	r.cluster_config, err = r.ClusterConfiguration()
 	Assert(err)
-	/* step: create the memberlist client */
+
+	// step: create the memberlist client
 	r.cluster, err = swim.Create(r.cluster_config)
 	Assert(err)
-	/* step: are we bootstrapping?? or join */
+
+	// step: are we bootstrapping?? or join
 	if Options.Bootstrap {
 		glog.Infof("No need to join cluster, as we are bootstrapping the cluster")
 	} else {
-		/* step: extract the members hostname / ipaddress and validate them */
+
+		// step: extract the members hostname | ipaddress and validate them
 		members := strings.Split(Options.Members, ",")
 		for _, member := range members {
 			if !IsValidHost(member) {
 				glog.Errorf("The member: %s is invalid, please recheck", member)
 			}
 		}
+
 		glog.Infof("Attempting to join %d cluster members: %s", len(members), Options.Members)
-		if successful, err := r.cluster.Join(members); err != nil {
+		if _, err := r.cluster.Join(members); err != nil {
 			glog.Errorf("Failed to join cluster members, error: %s", err)
 			return err
-		} else {
-			glog.Infof("Successfully joined with %d %s members", successful, PROG)
 		}
 
+		// step: we need to grab and up to date list of the members in the cluster
+		nodes := r.cluster.Members()
+		glog.V(5).Infof("Cluster has %d members current present", len(nodes))
 	}
 	return nil
 }
@@ -100,14 +119,14 @@ func (r *FabricService) SetupClusterMembership() error {
 // NotifyJoin is invoked when a node is detected to have joined.
 // The Node argument must not be modified.
 func (r *FabricService) NotifyJoin(node *swim.Node) {
-	glog.V(4).Infof("Member join event, node: %s", node)
+	glog.V(4).Infof("Member join event, node: %s:%d", node.Addr, node.Port)
 
 }
 
 // NotifyLeave is invoked when a node is detected to have left.
 // The Node argument must not be modified.
 func (r *FabricService) NotifyLeave(node *swim.Node) {
-	glog.V(4).Infof("Member left event, node: %s", node)
+	glog.V(4).Infof("Member leave event, node: %s:%d", node.Addr, node.Port)
 
 }
 
@@ -115,13 +134,15 @@ func (r *FabricService) NotifyLeave(node *swim.Node) {
 // updated, usually involving the meta data. The Node argument
 // must not be modified.
 func (r *FabricService) NotifyUpdate(node *swim.Node) {
-	glog.V(4).Infof("Member update event, node: %s", node)
+	glog.V(4).Infof("Member update event, node: %s:%d", node.Addr, node.Port)
 
 }
 
+// Builds a configuration for memberlist
 func (r *FabricService) ClusterConfiguration() (*swim.Config, error) {
 	var config *swim.Config
-	/* step: select the profile */
+
+	// step: select the profile
 	switch Options.ClusterProfile {
 	case "lan":
 		config = swim.DefaultLANConfig()
@@ -132,7 +153,8 @@ func (r *FabricService) ClusterConfiguration() (*swim.Config, error) {
 	default:
 		return nil, errors.New("Unsupport cluster profile: " + Options.ClusterProfile)
 	}
-	/* step: fill in the config */
+
+	// step: fill in the config
 	config.BindAddr = Options.BindAddr
 	config.BindPort = Options.BindPort
 	config.AdvertiseAddr = Options.AdvertiseAddr
@@ -140,7 +162,8 @@ func (r *FabricService) ClusterConfiguration() (*swim.Config, error) {
 	if Options.Secret != "" {
 		config.SecretKey = []byte(Options.Secret)
 	}
-	/* step: events and delegation */
+
+	// step: events and delegation
 	config.Events = r
 	return config, nil
 }
