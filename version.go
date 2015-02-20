@@ -16,25 +16,9 @@ limitations under the License.
 
 package main
 
-import (
-	"os"
-	"github.com/golang/glog"
+const (
+	PROG    = "Docker Fabric"
+	VERSION = "0.0.0"
+	AUTHOR  = "Rohith (gambol99@gmail.com)"
 )
 
-type ShutdownChannel chan bool
-
-func FileExists(filename string) (bool, error) {
-	if _, err := os.Stat(filename); err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
-}
-
-func Assert(err error) {
-	if err != nil {
-		glog.Fatalf("Failed, error: %s", err)
-	}
-}

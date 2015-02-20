@@ -16,25 +16,28 @@ limitations under the License.
 
 package main
 
-import (
-	"os"
-	"github.com/golang/glog"
-)
-
-type ShutdownChannel chan bool
-
-func FileExists(filename string) (bool, error) {
-	if _, err := os.Stat(filename); err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
+type Container struct {
+	/* the id for the container */
+	ID string
+	/* the name of the container */
+	Name string
+	/* the image it is running from */
+	Image string
+	/* the ports which are exposed */
+	Ports map[int]int
+	/* additional meta data associated with the container */
+	Meta map[string]string
+	/* is the container running */
+	Running bool
 }
 
-func Assert(err error) {
-	if err != nil {
-		glog.Fatalf("Failed, error: %s", err)
+func NewContainer() *Container {
+	return &Container{
+		ID: "",
+		Name: "",
+		Image: "",
+		Ports: make(map[int]int, 0),
+		Meta: make(map[string]string,0),
+		Running: true,
 	}
 }

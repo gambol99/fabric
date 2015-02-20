@@ -14,8 +14,8 @@ VERSION=$(shell awk '/const Version/ { print $$4 }' version.go | sed 's/"//g')
 
 build:
 	mkdir -p ./stage
-	go get github.com/tools/godep
-	godep go build -o stage/${NAME}
+	go get
+	go build -o stage/${NAME}
 
 docker: build
 	docker build -t ${AUTHOR}/${NAME} .

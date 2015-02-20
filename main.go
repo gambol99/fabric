@@ -17,19 +17,34 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/golang/glog"
+	"syscall"
+	"os/signal"
 )
 
 func main() {
 	/* step: parse the command line options and load configuration */
 	if err := LoadConfig(); err != nil {
-		glog.Fatalf("Failed to load the configuration, error: %s", err)
+		glog.Errorf("Invalid configration: %s", err)
+		os.Exit(1)
 	}
+	glog.Infof("Initialize the %s (%s) service", PROG, VERSION)
 
 	/* step: bind our terminal service and wait for incoming requests */
-
-	/* step: attempt to communicate to other members in the cluster */
-
-	/* step: wait for a shutdown signal */
-
+	if fabric, err := NewFabricService(); err != nil {
+		glog.Errorf("Failed to initialize the fabric service, error: %s", err)
+		os.Exit(1)
+	} else {
+		glog.Infof("Waiting for signal to quit")
+		/* step: setup the channel for shutdown signals */
+		signalChannel := make(chan os.Signal)
+		/* step: register the signals */
+		signal.Notify(signalChannel, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		/* step: wait on the signal */
+		<-signalChannel
+		/* shutdown the service */
+		fabric.Shutdown()
+	}
 }

@@ -93,7 +93,7 @@ func NewContainerStore() (ContainerStore, error) {
 	glog.Infof("Creating a docker store service, socket: %s", docker_socket)
 	store := new(Docker)
 	/* step: lets create the docker client */
-	if client, err := docker.NewClient(docker_socket); err != nil {
+	if client, err := docker.NewClient("unix://" + docker_socket); err != nil {
 		glog.Errorf("Failed to create a docker client, socket: %s, error: %s", docker_socket, err)
 		return nil, err
 	} else {
@@ -157,7 +157,7 @@ func (r *Docker) EventProcessor() error {
 		for {
 			select {
 			case event := <- update_channel:
-				glog.V(4).Infof("Receivied a docker event, id, status", event.ID[:12], event.Status)
+				glog.V(4).Infof("Receivied a docker event, id: %s, status: %s", event.ID[:12], event.Status)
 				/* step: are we creating or dying */
 				switch event.Status {
 				case DOCKER_START:

@@ -7,7 +7,7 @@
 FROM progrium/busybox
 MAINTAINER Rohith <gambol99@gmail.com>
 
-ADD stage/fabric /bin
+ADD stage/fabric /bin/fabric
 RUN opkg-install bash
 RUN chmod +x /bin/fabric
 
