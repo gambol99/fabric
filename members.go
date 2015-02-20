@@ -18,7 +18,6 @@ package main
 
 import (
 	"sync"
-
 )
 
 type Members interface {

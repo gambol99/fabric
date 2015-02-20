@@ -17,13 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
+	"errors"
 	"flag"
+	"fmt"
+	"io"
 	"strings"
 	"sync"
-	"errors"
-	"fmt"
-	"bytes"
-	"io"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/golang/glog"
@@ -118,7 +118,7 @@ func (r *Docker) List() ([]docker.APIContainers, error) {
 		glog.Errorf("Failed to retrieve a list of container from docker, error: %s", err)
 		return nil, err
 	} else {
-	 	return containers, nil
+		return containers, nil
 	}
 }
 
@@ -156,7 +156,7 @@ func (r *Docker) EventProcessor() error {
 		glog.Infof("Starting the events processor for docker events")
 		for {
 			select {
-			case event := <- update_channel:
+			case event := <-update_channel:
 				glog.V(4).Infof("Receivied a docker event, id: %s, status: %s", event.ID[:12], event.Status)
 				/* step: are we creating or dying */
 				switch event.Status {
@@ -169,7 +169,7 @@ func (r *Docker) EventProcessor() error {
 						go func() { r.destruction_events <- event.ID }()
 					}
 				}
-			case <- r.shutdown:
+			case <-r.shutdown:
 				glog.Infof("Recieved a shutdown signal from above, closing up resources")
 				r.client.RemoveEventListener(update_channel)
 				break
@@ -184,7 +184,7 @@ func (r *Docker) EventProcessor() error {
 // Params:
 //		channel:	the channel to send the event upon
 func (r *Docker) NotifyOnCreation(channel DockerEvents) {
-  	r.Lock()
+	r.Lock()
 	defer r.Unlock()
 	glog.V(6).Infof("Setting the channel for creation events, channel: %v", channel)
 	r.creation_events = channel

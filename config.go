@@ -27,8 +27,8 @@ import (
 
 const (
 	SSHD_PORT       = 1022
-	BIND_PORT 	    = 7946
-	BIND_ADDR 	    = "0.0.0.0"
+	BIND_PORT       = 7946
+	BIND_ADDR       = "0.0.0.0"
 	ADVERTISE_PORT  = BIND_PORT
 	ADVERTISE_ADDR  = ""
 	CLUSTER_PROFILE = "lan"
@@ -104,13 +104,13 @@ func LoadConfig() error {
 
 func ValidateConfig() error {
 	/* step: check we have one or more members */
-	if Options.Members == "" && !Options.Bootstrap{
+	if Options.Members == "" && !Options.Bootstrap {
 		return errors.New("You have not specified any members to join or the bootstrap options")
 	}
 	/* step: check we have a key file */
 	if exists, err := FileExists(Options.Key_File); err != nil {
 		return err
-	} else if !exists{
+	} else if !exists {
 		return errors.New(fmt.Sprintf("The key file: '%s' for the service does not exist", Options.Key_File))
 	}
 	return nil

@@ -26,7 +26,7 @@ import (
 var AuthenticatorOptions struct {
 	/* the authenticator to user */
 	authenticator string
-	}
+}
 
 func init() {
 	flag.StringVar(&AuthenticatorOptions.authenticator, "auth", "plain", "the authentication method to use")
@@ -39,7 +39,7 @@ type Authenticator interface {
 	Authenticate(userID string, actionID int) (bool, error)
 }
 
-type TestAuthentication struct {}
+type TestAuthentication struct{}
 
 func (r *TestAuthentication) AuthenticateLogin(user, token string) (string, error) {
 	return "11111111", nil
@@ -57,7 +57,3 @@ func NewAuthenticator() (Authenticator, error) {
 	}
 	return nil, errors.New("The authenticator not found or supported")
 }
-
-
-
-

@@ -33,11 +33,11 @@ type Container struct {
 
 func NewContainer() *Container {
 	return &Container{
-		ID: "",
-		Name: "",
-		Image: "",
-		Ports: make(map[int]int, 0),
-		Meta: make(map[string]string,0),
+		ID:      "",
+		Name:    "",
+		Image:   "",
+		Ports:   make(map[int]int, 0),
+		Meta:    make(map[string]string, 0),
 		Running: true,
 	}
 }

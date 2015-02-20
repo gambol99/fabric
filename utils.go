@@ -17,8 +17,8 @@ limitations under the License.
 package main
 
 import (
-	"os"
 	"github.com/golang/glog"
+	"os"
 )
 
 type ShutdownChannel chan bool

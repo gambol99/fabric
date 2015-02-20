@@ -20,8 +20,8 @@ import (
 	"errors"
 	"strings"
 
-	swim "github.com/hashicorp/memberlist"
 	"github.com/golang/glog"
+	swim "github.com/hashicorp/memberlist"
 )
 
 /* the api interface for fabric */
@@ -53,8 +53,10 @@ func NewFabricService() (Fabric, error) {
 	fabric := new(FabricService)
 	fabric.shutdown = make(ShutdownChannel)
 	/* step: create the authenticator service */
-	fabric.auth, err = NewAuthenticator(); Assert(err)
-	fabric.containers, err = NewContainerStore(); Assert(err)
+	fabric.auth, err = NewAuthenticator()
+	Assert(err)
+	fabric.containers, err = NewContainerStore()
+	Assert(err)
 	/* step: we need to setup the cluster membership */
 	if err := fabric.SetupClusterMembership(); err != nil {
 		glog.Errorf("Failed to setup the cluster, error: %s", err)
@@ -67,9 +69,11 @@ func (r *FabricService) SetupClusterMembership() error {
 	var err error
 	glog.Infof("Initializing the cluster membership, boostrap: %t", Options.Bootstrap)
 	/* step; we need to generate the configuration */
-	r.cluster_config, err = r.ClusterConfiguration(); Assert(err)
+	r.cluster_config, err = r.ClusterConfiguration()
+	Assert(err)
 	/* step: create the memberlist client */
-	r.cluster, err = swim.Create(r.cluster_config); Assert(err)
+	r.cluster, err = swim.Create(r.cluster_config)
+	Assert(err)
 	/* step: are we bootstrapping?? or join */
 	if Options.Bootstrap {
 		glog.Infof("No need to join cluster, as we are bootstrapping the cluster")
@@ -98,7 +102,6 @@ func (r *FabricService) SetupClusterMembership() error {
 func (r *FabricService) NotifyJoin(node *swim.Node) {
 	glog.V(4).Infof("Member join event, node: %s", node)
 
-
 }
 
 // NotifyLeave is invoked when a node is detected to have left.
@@ -116,7 +119,7 @@ func (r *FabricService) NotifyUpdate(node *swim.Node) {
 
 }
 
-func (r *FabricService) ClusterConfiguration() (*swim.Config, error ) {
+func (r *FabricService) ClusterConfiguration() (*swim.Config, error) {
 	var config *swim.Config
 	/* step: select the profile */
 	switch Options.ClusterProfile {
@@ -127,7 +130,7 @@ func (r *FabricService) ClusterConfiguration() (*swim.Config, error ) {
 	case "local":
 		config = swim.DefaultLocalConfig()
 	default:
-		return nil, errors.New("Unsupport cluster profile: "+Options.ClusterProfile)
+		return nil, errors.New("Unsupport cluster profile: " + Options.ClusterProfile)
 	}
 	/* step: fill in the config */
 	config.BindAddr = Options.BindAddr

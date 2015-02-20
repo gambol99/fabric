@@ -20,8 +20,8 @@ import (
 	"os"
 
 	"github.com/golang/glog"
-	"syscall"
 	"os/signal"
+	"syscall"
 )
 
 func main() {

@@ -49,4 +49,3 @@ func (r Member) IsOffline() bool {
 func (r Member) IsOnline() bool {
 	return r.Status
 }
-

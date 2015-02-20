@@ -21,4 +21,3 @@ const (
 	VERSION = "0.0.0"
 	AUTHOR  = "Rohith (gambol99@gmail.com)"
 )
-
